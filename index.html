@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COINS</title>
+    
+    <link rel="icon" href="https://cdn.phototourl.com/free/2026-08-10-0fdd1bbd-f327-42ca-ad5e-98eef581ba4e.png" type="image/png">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="COINS">
+    <meta name="theme-color" content="#f0fdf4">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary-color: #0284c7; 
+            --mint-color: #a7f3d0; 
+            --bg-color: #f0fdf4; 
+            --card-bg: rgba(255, 255, 255, 0.9); 
+            --text-color: #1e293b; 
+            --border-color: #e2e8f0; 
+            --backdrop-blur: blur(12px);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; width: 100vw; height: 100vh; font-family: 'Quicksand', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        h2, h3 { color: var(--primary-color); font-weight: 700; margin: 0; }
+        
+        .screen { width: 100%; max-width: 440px; height: 100%; max-height: 900px; background: var(--card-bg); backdrop-filter: var(--backdrop-blur); -webkit-backdrop-filter: var(--backdrop-blur); display: flex; flex-direction: column; justify-content: center; padding: 16px; position: absolute; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @media (min-width: 480px) {
+            .screen { height: 95vh; max-height: 920px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); border: 1px solid var(--border-color); }
+        }
+
+        /* Hiệu ứng chuyển màn hình */
+        .screen.fade-out { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+        .screen.fade-in { opacity: 1; transform: translateY(0); }
+
+        .splash-screen { z-index: 10; text-align: center; }
+        .auth-screen { z-index: 9; text-align: center; display: none; opacity: 0; }
+        .app-screen { justify-content: space-between; padding: 16px; display: none; z-index: 8; opacity: 0; }
+        .hidden { display: none !important; }
+
+        .loading-bar-container { width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; margin-top: 30px; overflow: hidden; }
+        .loading-bar { width: 0%; height: 100%; background: var(--primary-color); transition: width 0.1s linear; }
+
+        .options-row { display: flex; gap: 12px; margin: 20px 0; justify-content: center; }
+        .option-card { flex: 1; border: 2px solid var(--border-color); border-radius: 16px; padding: 16px 10px; cursor: pointer; background: var(--card-bg); text-align: center; transition: all 0.2s; }
+        .option-card.selected { border-color: var(--primary-color); background: #ffffff; box-shadow: 0 4px 12px rgba(2,132,199,0.15); }
+        .option-card span { display: block; font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--text-color); }
+
+        .single-pin-input { width: 100%; height: 48px; text-align: center; font-size: 22px; font-weight: bold; letter-spacing: 8px; border: 1px solid var(--border-color); border-radius: 12px; background: #ffffff; color: var(--text-color); font-family: 'Quicksand', sans-serif; }
+        .single-pin-input:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+
+        .phone-layout { display: flex; flex-direction: column; gap: 10px; flex: 1; height: 100%; overflow: hidden; margin-top: 4px; }
+        
+        .panel { background: #ffffff; padding: 12px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04); }
+        .panel.history-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 0; min-height: 0; }
+        
+        .app-header-inline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); position: relative; }
+        
+        .menu-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--primary-color); padding: 2px 6px; font-weight: bold; letter-spacing: 1px; }
+        .dropdown-menu { position: absolute; right: 0; top: 38px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: none; z-index: 100; width: 160px; overflow: hidden; }
+        .dropdown-menu button { background: none; border: none; width: 100%; text-align: left; padding: 12px 14px; font-size: 14px; color: var(--text-color); cursor: pointer; }
+        .dropdown-menu button:hover { background: var(--bg-color); color: var(--primary-color); }
+        .dropdown-menu button.disabled { color: #cbd5e1 !important; cursor: not-allowed; background: transparent !important; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-content { background: #ffffff; width: 100%; max-width: 380px; padding: 20px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); border: 1px solid var(--border-color); color: var(--text-color); }
+
+        .form-group { margin-bottom: 8px; text-align: left; position: relative; }
+        label { display: block; margin-bottom: 3px; font-weight: 600; font-size: 13px; color: var(--text-color); opacity: 0.8; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 10px; background: #ffffff; color: var(--text-color); font-size: 14px; font-family: 'Quicksand', sans-serif; }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        
+        button { width: 100%; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; font-family: 'Quicksand', sans-serif; transition: transform 0.1s ease, opacity 0.2s; }
+        button:active { transform: scale(0.97); }
+        .btn-chinh { background-color: var(--primary-color); color: #ffffff; }
+        .btn-chinh:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        .btn-nap { background-color: #d1fae5; color: #065f46; }
+        .btn-nhac-zalo { background-color: #dc2626; color: #ffffff; font-size: 12px; padding: 8px; margin-top: 6px; }
+
+        /* Khung Gợi Ý Mệnh Giá Tiền Kiểu Ngân Hàng */
+        .quick-suggestions { display: flex; gap: 6px; margin-top: 4px; overflow-x: auto; padding-bottom: 2px; }
+        .quick-suggestions::-webkit-scrollbar { display: none; }
+        .suggestion-chip { background: var(--bg-color); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--text-color); }
+        .suggestion-chip:hover { border-color: var(--primary-color); color: var(--primary-color); background: #e0f2fe; }
+
+        .dashboard { display: flex; justify-content: space-between; background: var(--bg-color); padding: 12px 14px; border-radius: 14px; border: 2px solid var(--border-color); margin-top: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); }
+        .stat-box { text-align: center; flex: 1; }
+        .stat-box span { font-size: 12px; color: var(--text-color); opacity: 0.7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-box strong { display: block; font-size: 18px; font-weight: 800; margin-top: 4px; }
+        
+        .alert-box { background-color: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+        
+        .filter-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px; }
+        .filter-container select { padding: 5px 8px; font-size: 12px; border-radius: 8px; width: auto; font-weight: 600; color: var(--primary-color); border-color: var(--border-color); background: #ffffff; }
+
+        .table-container { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 12px; min-height: 0; background: #ffffff; }
+        table { width: 100%; border-collapse: collapse; }
+        
+        th, td { padding: 8px 6px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); font-size: 12px; vertical-align: middle; }
+        th { background: #f8fafc; color: var(--primary-color); position: sticky; top: 0; z-index: 2; font-weight: 700; }
+        
+        th:nth-child(1), td:nth-child(1) { width: 42%; text-align: center; word-break: break-word; white-space: normal; } 
+        th:nth-child(2), td:nth-child(2) { width: 32%; text-align: center; white-space: nowrap; } 
+        th:nth-child(3), td:nth-child(3) { width: 26%; text-align: center; white-space: nowrap; } 
+
+        .delete-circle-btn { background: #fee2e2; color: #991b1b; border: none; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; font-weight: 900; font-size: 16px; line-height: 1; }
+        .delete-circle-btn:hover { background: #fecaca; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Màn hình Splash Screen -->
+    <div id="splashScreen" class="screen splash-screen">
+        <h2 style="font-size: 32px; margin-bottom: 10px;">COINS</h2>
+        <p style="font-size: 14px; opacity: 0.7;">Đang tải ứng dụng...</p>
+        <div class="loading-bar-container">
+            <div id="loadingBar" class="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- 2. Màn hình Lựa chọn & Nhập Mật Khẩu -->
+    <div id="authScreen" class="screen auth-screen">
+        <h2 style="font-size: 28px; margin-bottom: 4px;">COINS</h2>
+        <p style="font-size: 16px; font-weight: 600; margin-bottom: 20px; opacity: 0.8;">Welcome!</p>
+        
+        <div class="options-row">
+            <div id="optEdit" class="option-card" onclick="selectMode('edit')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span>Chỉnh sửa</span>
+            </div>
+            <div id="optView" class="option-card" onclick="selectMode('view')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Chỉ xem</span>
+            </div>
+        </div>
+
+        <div id="pinSection" class="hidden" style="margin-bottom: 15px; text-align: left;">
+            <label style="font-size: 13px; margin-bottom: 5px;">Nhập mã PIN bảo mật:</label>
+            <input type="password" id="loginPinBox" maxlength="6" class="single-pin-input" placeholder="------" oninput="checkLoginPin()">
+        </div>
+        
+        <button id="continueBtn" class="btn-chinh" disabled onclick="loginApp()">Continue</button>
+    </div>
+
+    <!-- 3. Màn hình Chính -->
+    <div id="appScreen" class="screen app-screen">
+        <div class="phone-layout">
+            <div class="panel">
+                <div class="app-header-inline">
+                    <h3 id="appTitleLogo" style="font-size: 16px; cursor: pointer; user-select: none;" ondblclick="handleLogoDoubleClick()" title="Nhấp đúp 2 lần để mở khóa">COINS</h3>
+                    <div>
+                        <button class="menu-btn" onclick="toggleMenu(event)">...</button>
+                        <div id="dropdownMenu" class="dropdown-menu"></div>
+                    </div>
+                </div>
+
+                <div id="editControlsContainer">
+                    <!-- Ô Nạp Tiền -->
+                    <div class="form-group">
+                        <label>Nạp thêm tiền:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <div style="flex: 1; position: relative;">
+                                <input type="text" id="depositAmount" placeholder="Số tiền nạp" oninput="handleMoneyInput('depositAmount', 'depositSuggestions')">
+                                <div id="depositSuggestions" class="quick-suggestions"></div>
+                            </div>
+                            <button class="btn-nap" style="width: 90px; height: 38px;" onclick="depositMoney()">Nạp</button>
+                        </div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid var(--border-color); margin:6px 0;">
+                    
+                    <div class="form-group"><label>Sản phẩm:</label><input type="text" id="productName" placeholder="Tên sản phẩm"></div>
+                    
+                    <!-- Ô Giá Tiền Chi Tiêu -->
+                    <div class="form-group">
+                        <label>Giá tiền:</label>
+                        <input type="text" id="productPrice" placeholder="Giá tiền" oninput="handleMoneyInput('productPrice', 'priceSuggestions')">
+                        <div id="priceSuggestions" class="quick-suggestions"></div>
+                    </div>
+                    
+                    <button class="btn-chinh" onclick="addExpense()" style="margin-top: 2px;">Thêm Khoản Chi</button>
+                </div>
+
+                <div class="dashboard">
+                    <div class="stat-box">
+                        <span>Tổng đã chi</span>
+                        <strong id="totalSpent" style="color:#dc2626;">0 đ</strong>
+                    </div>
+                    <div style="width: 1px; background: var(--border-color); margin: 0 4px;"></div>
+                    <div class="stat-box">
+                        <span>Số dư hiện tại</span>
+                        <strong id="currentBalance" style="color:#059669;">0 đ</strong>
+                    </div>
+                </div>
+                
+                <div id="lowBalanceAlert" class="alert-box hidden">
+                    <span>⚠️ Tiền sắp hết (dưới 100k), vui lòng nạp thêm!</span>
+                    <button class="btn-nhac-zalo" onclick="sendReportZalo()">Gửi báo cáo & Nhắc nạp tiền qua Zalo</button>
+                </div>
+            </div>
+
+            <!-- Lịch sử giao dịch -->
+            <div class="panel history-panel">
+                <div class="filter-container">
+                    <h3 style="font-size: 14px;">Lịch sử giao dịch</h3>
+                    <select id="timeFilter" onchange="renderTable()">
+                        <option value="all">Tất cả thời gian</option>
+                        <option value="month">Tháng này</option>
+                        <option value="week">Tuần này (T2 - CN)</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nội dung</th>
+                                <th>Số tiền</th>
+                                <th class="time-col">Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTableBody">
+                            <tr><td colspan="3" style="text-align:center; opacity:0.6;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đổi Mật Khẩu -->
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px; text-align: center;">Đổi Mật Khẩu</h3>
+            <div class="form-group">
+                <label>Mã PIN mới (6 số):</label>
+                <input type="password" id="newPinBox" maxlength="6" class="single-pin-input" placeholder="------">
+            </div>
+            <div class="form-group">
+                <label>Xác nhận lại mã PIN mới:</label>
+                <input type="password" id="confirmPinBox" maxlength="6" class="single-pin-input" placeholder="------">
+            </div>
+            <button class="btn-chinh" onclick="saveNewPassword()">Lưu mật khẩu mới</button>
+            <button class="btn-chinh" onclick="closeChangePasswordModal()" style="margin-top: 6px;">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Modal Nhập Mã PIN Bí Mật (000) -->
+    <div id="secretOwnerModal" class="modal hidden">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="margin-bottom: 15px;">Mã PIN</h3>
+            <div class="form-group">
+                <input type="password" id="secretPinBox" maxlength="3" class="single-pin-input" placeholder="---">
+            </div>
+            <button class="btn-chinh" onclick="verifySecretPin()">Xác nhận</button>
+            <button class="btn-chinh" onclick="closeSecretModal()" style="margin-top: 6px;">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Modal Xem Lịch Sử Đã Xóa -->
+    <div id="deletedHistoryModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px; display: flex; flex-direction: column; max-height: 80vh;">
+            <h3 style="margin-bottom: 10px; text-align: center;">Lịch Sử Giao Dịch Đã Xóa</h3>
+            <p style="font-size: 12px; text-align: center; margin-bottom: 10px; opacity: 0.7;">Danh sách các khoản đã bị xóa:</p>
+            <div class="table-container" style="flex: 1; max-height: 300px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nội dung</th>
+                            <th>Số tiền</th>
+                            <th>Thời gian xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deletedTableBody">
+                        <tr><td colspan="3" style="text-align:center; opacity:0.6;">Chưa có dữ liệu bị xóa</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn-chinh" onclick="closeDeletedHistoryModal()" style="width: 100%;">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Xung nhịp rung xúc giác (Haptic Feedback)
+        function triggerVibration() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(40);
+            }
+        }
+
+        // --- HỆ THỐNG GỢI Ý MỆNH GIÁ TIỀN KIỂU NGÂN HÀNG ---
+        window.handleMoneyInput = function(inputId, suggestionId) {
+            const input = document.getElementById(inputId);
+            const suggestionBox = document.getElementById(suggestionId);
+            const rawVal = input.value.replace(/\D/g, '');
+
+            if (!rawVal) {
+                suggestionBox.innerHTML = '';
+                return;
+            }
+
+            const num = parseInt(rawVal, 10);
+            const suggestions = [num, num * 10, num * 100];
+
+            suggestionBox.innerHTML = suggestions.map(val => {
+                const formatted = val.toLocaleString('vi-VN') + ' đ';
+                return `<div class="suggestion-chip" onclick="selectSuggestion('${inputId}', '${suggestionId}', ${val})">${formatted}</div>`;
+            }).join('');
+        }
+
+        window.selectSuggestion = function(inputId, suggestionId, value) {
+            triggerVibration();
+            document.getElementById(inputId).value = value.toLocaleString('vi-VN');
+            document.getElementById(suggestionId).innerHTML = '';
+        }
+
+        function getCleanNumber(inputId) {
+            const val = document.getElementById(inputId).value;
+            return parseFloat(val.replace(/\./g, '').replace(' đ', '')) || 0;
+        }
+
+        // --- CẤU HÌNH FIREBASE VÀ LOGIC CHÍNH ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcrniyvrvC1kvQSINdprgjZ-cjm5SMqM",
+            authDomain: "coins-a74d8.firebaseapp.com",
+            databaseURL: "https://coins-a74d8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "coins-a74d8",
+            storageBucket: "coins-a74d8.firebasestorage.app",
+            messagingSenderId: "805726364508",
+            appId: "1:805726364508:web:39e6b9129d834efe2d9799"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'family_data');
+        let globalData = null;
+        let currentMode = ''; 
+        let currentPassword = "310309";
+        let isEditModeActive = false;
+
+        window.addEventListener('load', () => {
+            let bar = document.getElementById('loadingBar');
+            let width = 0;
+            let interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width += 15;
+                    bar.style.width = width + '%';
+                }
+            }, 25);
+            
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                const auth = document.getElementById('authScreen');
+                splash.classList.add('fade-out');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    auth.style.display = 'flex';
+                    auth.classList.add('fade-in');
+                }, 300);
+            }, 1000);
+            
+            fetchInitialData();
+        });
+
+        async function fetchInitialData() {
+            try {
+                const snap = await get(dbRef);
+                if(snap.exists()) {
+                    globalData = snap.val();
+                    if(globalData.password) currentPassword = String(globalData.password);
+                    if(!globalData.deletedExpenses) {
+                        await update(dbRef, { deletedExpenses: [] });
+                        globalData.deletedExpenses = [];
+                    }
+                } else {
+                    await set(dbRef, { balance: 0, expenses: [], deletedExpenses: [], password: "310309" });
+                }
+            } catch(e) {
+                console.error("Lỗi kết nối Firebase:", e);
+                globalData = { balance: 0, expenses: [], deletedExpenses: [], password: "310309" };
+            }
+        }
+
+        window.selectMode = function(mode) {
+            triggerVibration();
+            currentMode = mode;
+            document.getElementById('optEdit').classList.remove('selected');
+            document.getElementById('optView').classList.remove('selected');
+            
+            const btn = document.getElementById('continueBtn');
+            const pinSec = document.getElementById('pinSection');
+
+            if (mode === 'edit') {
+                document.getElementById('optEdit').classList.add('selected');
+                pinSec.classList.remove('hidden');
+                document.getElementById('loginPinBox').value = '';
+                btn.disabled = true;
+                setTimeout(() => document.getElementById('loginPinBox').focus(), 50);
+            } else {
+                document.getElementById('optView').classList.add('selected');
+                pinSec.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        window.checkLoginPin = function() {
+            if (currentMode !== 'edit') return;
+            const pinVal = document.getElementById('loginPinBox').value.trim();
+            const btn = document.getElementById('continueBtn');
+            btn.disabled = (pinVal !== currentPassword);
+        }
+
+        window.loginApp = async function() {
+            triggerVibration();
+            const authScreen = document.getElementById('authScreen');
+            const appScreen = document.getElementById('appScreen');
+            
+            authScreen.classList.remove('fade-in');
+            authScreen.classList.add('fade-out');
+            
+            setTimeout(() => {
+                authScreen.style.display = 'none';
+                appScreen.style.display = 'flex';
+                appScreen.classList.add('fade-in');
+            }, 300);
+            
+            const editControls = document.getElementById('editControlsContainer');
+            const dropdown = document.getElementById('dropdownMenu');
+
+            if (currentMode === 'view') {
+                editControls.classList.add('hidden');
+                dropdown.innerHTML = `
+                    <button class="disabled">Sửa</button>
+                    <button onclick="logoutApp()" style="color:#dc2626;">Đăng xuất</button>
+                `;
+            } else {
+                editControls.classList.remove('hidden');
+                dropdown.innerHTML = `
+                    <button onclick="toggleEditMode(event)">Sửa</button>
+                    <button onclick="openChangePasswordModal()">Đổi mật khẩu</button>
+                    <button onclick="logoutApp()" style="color:#dc2626;">Đăng xuất</button>
+                `;
+            }
+
+            if (globalData) {
+                updateUIWithData(globalData);
+            }
+
+            onValue(dbRef, (snap) => {
+                const data = snap.val();
+                if (data) {
+                    globalData = data;
+                    updateUIWithData(data);
+                }
+            });
+        };
+
+        function updateUIWithData(data) {
+            if (data.password) currentPassword = String(data.password);
+            
+            const expenses = data.expenses || [];
+            const spent = expenses.filter(e => e.type === 'expense').reduce((a, b) => a + b.price, 0);
+            const currentBal = (data.balance || 0) - spent;
+
+            document.getElementById('totalSpent').innerText = spent.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('currentBalance').innerText = currentBal.toLocaleString('vi-VN') + ' đ';
+
+            const hasDeposited = expenses.some(e => e.type === 'deposit') || (data.balance || 0) > 0;
+            const alertBox = document.getElementById('lowBalanceAlert');
+
+            if (currentMode === 'edit' && hasDeposited && currentBal < 100000) {
+                alertBox.classList.remove('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+            }
+
+            renderTable();
+        }
+
+        window.toggleMenu = function(event) {
+            event.stopPropagation();
+            triggerVibration();
+            const menu = document.getElementById('dropdownMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        };
+
+        window.toggleEditMode = function(event) {
+            event.stopPropagation();
+            triggerVibration();
+            isEditModeActive = !isEditModeActive;
+            renderTable();
+            document.getElementById('dropdownMenu').style.display = 'none';
+        };
+
+        window.addEventListener('click', (e) => {
+            const menu = document.getElementById('dropdownMenu');
+            if(menu) menu.style.display = 'none';
+
+            if (isEditModeActive && !e.target.classList.contains('delete-circle-btn')) {
+                isEditModeActive = false;
+                renderTable();
+            }
+        });
+
+        function filterExpensesByTime(expenses) {
+            const filterVal = document.getElementById('timeFilter').value;
+            if (filterVal === 'all') return expenses;
+            const now = new Date();
+            
+            return expenses.filter(e => {
+                try {
+                    const match = e.time.match(/\((\d{2})\/(\d{2})\)/);
+                    if (!match) return true;
+                    const d = parseInt(match[1]);
+                    const m = parseInt(match[2]) - 1;
+                    const itemDate = new Date(now.getFullYear(), m, d);
+
+                    if (filterVal === 'month') {
+                        return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                    } else if (filterVal === 'week') {
+                        const currentDayOfWeek = now.getDay();
+                        const distanceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+                        const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + distanceToMonday);
+                        monday.setHours(0, 0, 0, 0);
+                        const sunday = new Date(monday);
+                        sunday.setDate(monday.getDate() + 6);
+                        sunday.setHours(23, 59, 59, 999);
+                        return itemDate >= monday && itemDate <= sunday;
+                    }
+                } catch(err) {
+                    return true;
+                }
+                return true;
+            });
+        }
+
+        window.renderTable = function() {
+            if (!globalData) return;
+            let expenses = globalData.expenses || [];
+            expenses = filterExpensesByTime(expenses);
+
+            const tbody = document.getElementById('expenseTableBody');
+            const tableHeadTr = document.querySelector('table thead tr');
+
+            if (isEditModeActive) {
+                if (!document.getElementById('thAction')) {
+                    tableHeadTr.insertAdjacentHTML('beforeend', '<th id="thAction" style="width: 30px; text-align: center;">Xóa</th>');
+                }
+            } else {
+                const thAction = document.getElementById('thAction');
+                if (thAction) thAction.remove();
+            }
+
+            if (expenses.length === 0) {
+                const colspan = isEditModeActive ? 4 : 3;
+                tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; opacity:0.6;">Chưa có dữ liệu</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = expenses.slice().map((e, index) => {
+                const realIndex = (globalData.expenses || []).indexOf(e);
+                const isDep = e.type === 'deposit';
+                const sign = isDep ? '+' : '-';
+                const color = isDep ? '#059669' : '#dc2626';
+
+                let actionTd = isEditModeActive ? `<td style="text-align: center;"><button class="delete-circle-btn" onclick="deleteExpense(event, ${realIndex})">&minus;</button></td>` : '';
+
+                return `<tr>
+                    <td style="text-align: center;"><strong>${e.name}</strong></td>
+                    <td style="color:${color}; text-align: center;">${sign}${e.price.toLocaleString('vi-VN')} đ</td>
+                    <td class="time-col" style="text-align: center;">${e.time}</td>
+                    ${actionTd}
+                </tr>`;
+            }).reverse().join('');
+        }
+
+        window.deleteExpense = async function(event, index) {
+            event.stopPropagation(); 
+            triggerVibration();
+            if(confirm("Bạn có chắc muốn xóa giao dịch này không?")) {
+                const snap = await get(dbRef);
+                const data = snap.val() || {};
+                let exps = data.expenses || [];
+                let removed = exps.splice(index, 1)[0];
+                if (!removed) return;
+
+                let newBalance = data.balance || 0;
+                if(removed.type === 'deposit') newBalance -= removed.price;
+
+                let deletedExps = data.deletedExpenses || [];
+                const now = new Date();
+                const deleteTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} (${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')})`;
+                
+                deletedExps.push({ name: removed.name, price: removed.price, type: removed.type, deletedAt: deleteTimeStr });
+
+                await update(dbRef, { balance: newBalance, expenses: exps, deletedExpenses: deletedExps });
+
+                globalData.expenses = exps;
+                globalData.balance = newBalance;
+                globalData.deletedExpenses = deletedExps;
+                updateUIWithData(globalData);
+            }
+        };
+
+        window.logoutApp = function() {
+            triggerVibration();
+            location.reload();
+        };
+
+        window.depositMoney = async function() {
+            triggerVibration();
+            const amt = getCleanNumber('depositAmount');
+            if(amt > 0) {
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} (${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')})`;
+                const snap = await get(dbRef);
+                const data = snap.val() || { balance: 0, expenses: [] };
+                const exps = data.expenses || [];
+                exps.push({ name: 'Nạp tiền', price: amt, time: timeStr, type: 'deposit' });
+                await update(dbRef, { balance: (data.balance || 0) + amt, expenses: exps });
+                document.getElementById('depositAmount').value = '';
+                document.getElementById('depositSuggestions').innerHTML = '';
+                alert('Nạp tiền thành công!');
+            }
+        };
+
+        window.addExpense = async function() {
+            triggerVibration();
+            const name = document.getElementById('productName').value.trim();
+            const price = getCleanNumber('productPrice');
+            if(name && price > 0) {
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} (${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')})`;
+                const snap = await get(dbRef);
+                const data = snap.val() || { expenses: [] };
+                const exps = data.expenses || [];
+                exps.push({ name, price, time: timeStr, type: 'expense' });
+                await update(dbRef, { expenses: exps });
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('priceSuggestions').innerHTML = '';
+            }
+        };
+
+        window.sendReportZalo = function() {
+            triggerVibration();
+            if (!globalData || !globalData.expenses) return;
+            const expenses = globalData.expenses;
+            const currentBalText = document.getElementById('currentBalance').innerText;
+
+            let lastDepositIndex = -1;
+            for (let i = expenses.length - 1; i >= 0; i--) {
+                if (expenses[i].type === 'deposit') {
+                    lastDepositIndex = i;
+                    break;
+                }
+            }
+
+            let recentExpenses = [];
+            let totalRecentSpent = 0;
+            let depositInfo = "Chưa ghi nhận lần nạp gần đây";
+
+            if (lastDepositIndex !== -1) {
+                depositInfo = `${expenses[lastDepositIndex].name} (+${expenses[lastDepositIndex].price.toLocaleString('vi-VN')} đ) lúc ${expenses[lastDepositIndex].time}`;
+                recentExpenses = expenses.slice(lastDepositIndex + 1).filter(e => e.type === 'expense');
+            } else {
+                recentExpenses = expenses.filter(e => e.type === 'expense');
+            }
+
+            totalRecentSpent = recentExpenses.reduce((sum, e) => sum + e.price, 0);
+            let listText = recentExpenses.length > 0 ? recentExpenses.map(e => `- ${e.name}: ${e.price.toLocaleString('vi-VN')}đ (${e.time})`).join('\n') : "- Chưa có khoản chi nào.";
+
+            const message = `Báo Cáo COINS\nTài khoản COINS ${currentBalText}\n\nMoc nap gan nhat:\n${depositInfo}\n\nCac khoan da chi:\n${listText}\n\nTong chi tu moc nay: ${totalRecentSpent.toLocaleString('vi-VN')} đ`;
+
+            if (navigator.share) {
+                navigator.share({ title: 'Báo Cáo COINS', text: message }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(message);
+                alert('Đã sao chép nội dung báo cáo & nhắc nạp tiền! Hãy dán vào Zalo để gửi nhé.');
+            }
+        };
+
+        window.openChangePasswordModal = function() {
+            triggerVibration();
+            document.getElementById('newPinBox').value = '';
+            document.getElementById('confirmPinBox').value = '';
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        window.closeChangePasswordModal = function() {
+            triggerVibration();
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        window.saveNewPassword = async function() {
+            triggerVibration();
+            const newPin = document.getElementById('newPinBox').value.trim();
+            const confirmPin = document.getElementById('confirmPinBox').value.trim();
+
+            if(newPin.length !== 6 || isNaN(newPin)) {
+                alert("Mã PIN mới phải bao gồm đúng 6 chữ số!");
+                return;
+            }
+            if(newPin !== confirmPin) {
+                alert("Mã PIN xác nhận không khớp!");
+                return;
+            }
+
+            await update(dbRef, { password: newPin });
+            currentPassword = newPin;
+            alert("Đổi mật khẩu thành công!");
+            closeChangePasswordModal();
+        }
+
+        // --- TÍNH NĂNG BÍ MẬT: Nhấp đúp logo ở chế độ Xem để nhập PIN 000 ---
+        window.handleLogoDoubleClick = function() {
+            triggerVibration();
+            if (currentMode === 'view') {
+                document.getElementById('secretPinBox').value = '';
+                document.getElementById('secretOwnerModal').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('secretPinBox').focus();
+                }, 50);
+            }
+        }
+
+        window.closeSecretModal = function() {
+            triggerVibration();
+            document.getElementById('secretOwnerModal').classList.add('hidden');
+        }
+
+        window.verifySecretPin = function() {
+            triggerVibration();
+            const pin = document.getElementById('secretPinBox').value.trim();
+            if (pin === "000") {
+                closeSecretModal();
+                openDeletedHistoryModal();
+            } else {
+                alert("Sai mã PIN!");
+                document.getElementById('secretPinBox').value = '';
+            }
+        }
+
+        window.openDeletedHistoryModal = function() {
+            const tbody = document.getElementById('deletedTableBody');
+            const deletedList = globalData ? (globalData.deletedExpenses || []) : [];
+
+            if (deletedList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; opacity:0.6;">Chưa có giao dịch nào bị xóa</td></tr>`;
+            } else {
+                tbody.innerHTML = deletedList.slice().map(item => {
+                    const isDep = item.type === 'deposit';
+                    const sign = isDep ? '+' : '-';
+                    const color = isDep ? '#059669' : '#dc2626';
+                    return `<tr>
+                        <td style="text-align: center;"><strong>${item.name}</strong></td>
+                        <td style="color:${color}; text-align: center;">${sign}${item.price.toLocaleString('vi-VN')} đ</td>
+                        <td style="text-align:center;">${item.deletedAt}</td>
+                    </tr>`;
+                }).reverse().join('');
+            }
+
+            document.getElementById('deletedHistoryModal').classList.remove('hidden');
+        }
+
+        window.closeDeletedHistoryModal = function() {
+            triggerVibration();
+            document.getElementById('deletedHistoryModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
