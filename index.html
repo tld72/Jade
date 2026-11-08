@@ -2,27 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Jade</title>
     
-    <!-- Cấu hình hiển thị khung ảnh preview khi gửi link (Open Graph) -->
+    <!-- Cấu hình chuẩn cho App độc lập trên iOS và Android -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jade">
+    <meta name="theme-color" content="#fbf7f4">
+
+    <!-- Cấu hình hiển thị khung ảnh preview khi gửi link -->
     <meta property="og:title" content="Jade - Sổ Thu Chi Tối Giản">
     <meta property="og:description" content="Quản lý chi tiêu cá nhân nhanh chóng, gọn gàng và tiện lợi.">
     <meta property="og:image" content="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png">
     <meta property="og:type" content="website">
 
-    <!-- Icon Tab Trình Duyệt -->
+    <!-- Icon Tab Trình Duyệt & Apple Touch Icon -->
     <link rel="icon" href="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png" type="image/png">
-    
-    <!-- Icon iOS Home Screen -->
     <link rel="apple-touch-icon" href="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Jade">
     
-    <!-- Manifest PWA App -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkphZGUiLAogICJzaG9ydF9uYW1lIjogIkphZGUiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmYmY3ZjQiLAogICJ0aGVtZV9jb2xvciI6ICIjZmJmN2Y0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4ucGhvdG90b3VybC5jb20vbWVtYmVyLzIwMjYtMTEtMDgtZmI5NTBkOGQtYWE2Zi00NDlkLDhmZDgtMzI4Mzc2MmE5MTViLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfV9=">
-    <meta name="theme-color" content="#fbf7f4">
+    <!-- Manifest PWA Offline App -->
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Jade%22%2C%22short_name%22%3A%22Jade%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fbf7f4%22%2C%22theme_color%22%3A%22%23fbf7f4%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn.phototourl.com%2Fmember%2F2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -311,7 +311,6 @@
     </div>
 
     <script>
-        // Gộp toàn bộ danh sách lịch sử thu chi của bạn vào đây (chạy offline hoàn toàn trên máy)
         const DEFAULT_DATA = {
             expenses: [
                 { name: 'Nạp tiền', price: 592000, time: '09/08', type: 'deposit' },
@@ -599,16 +598,16 @@
         };
 
         function getStorageData() {
-            const data = localStorage.getItem('jade_offline_full_db');
+            const data = localStorage.getItem('jade_offline_v3');
             if (!data) {
-                localStorage.setItem('jade_offline_full_db', JSON.stringify(DEFAULT_DATA));
+                localStorage.setItem('jade_offline_v3', JSON.stringify(DEFAULT_DATA));
                 return DEFAULT_DATA;
             }
             return JSON.parse(data);
         }
 
         function saveStorageData(data) {
-            localStorage.setItem('jade_offline_full_db', JSON.stringify(data));
+            localStorage.setItem('jade_offline_v3', JSON.stringify(data));
         }
 
         let appData = getStorageData();
@@ -676,7 +675,6 @@
                 const sign = isDep ? '+' : '-';
                 const color = isDep ? 'var(--green-color)' : 'var(--red-color)';
                 
-                // Trích xuất định dạng ngày tháng DD/MM từ chuỗi thời gian cũ (bỏ giờ phút)
                 let timeDisplay = e.time;
                 const match = e.time.match(/(\d{2}\/\d{2})/);
                 if (match) {
@@ -737,7 +735,7 @@
             }
         };
 
-        // Kích hoạt tính năng Service Worker để chạy Offline hoàn toàn không cần Wi-Fi
+        // Kích hoạt Service Worker nội bộ để lưu cache chạy ngoại tuyến hoàn toàn
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
