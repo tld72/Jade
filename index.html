@@ -2,27 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jade</title>
     
-    <!-- Cấu hình chuẩn cho App độc lập trên iOS và Android -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Jade">
-    <meta name="theme-color" content="#fbf7f4">
-
-    <!-- Cấu hình hiển thị khung ảnh preview khi gửi link -->
+    <!-- Cấu hình hiển thị khung ảnh preview khi gửi link (Open Graph) -->
     <meta property="og:title" content="Jade - Sổ Thu Chi Tối Giản">
     <meta property="og:description" content="Quản lý chi tiêu cá nhân nhanh chóng, gọn gàng và tiện lợi.">
     <meta property="og:image" content="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png">
     <meta property="og:type" content="website">
 
-    <!-- Icon Tab Trình Duyệt & Apple Touch Icon -->
+    <!-- Icon Tab Trình Duyệt -->
     <link rel="icon" href="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png" type="image/png">
-    <link rel="apple-touch-icon" href="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png">
     
-    <!-- Manifest PWA Offline App -->
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Jade%22%2C%22short_name%22%3A%22Jade%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fbf7f4%22%2C%22theme_color%22%3A%22%23fbf7f4%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn.phototourl.com%2Fmember%2F2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    <!-- Icon iOS Home Screen -->
+    <link rel="apple-touch-icon" href="https://cdn.phototourl.com/member/2026-11-08-fb950d8d-aa6f-449d-8fd8-3283762a915b.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Jade">
+    
+    <!-- Manifest PWA App -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkphZGUiLAogICJzaG9ydF9uYW1lIjogIkphZGUiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmYmY3ZjQiLAogICJ0aGVtZV9jb2xvciI6ICIjZmJmN2Y0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4ucGhvdG90b3VybC5jb20vbWVtYmVyLzIwMjYtMTEtMDgtZmI5NTBkOGQtYWE2Zi00NDlkLDhmZDgtMzI4Mzc2MmE5MTViLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfV9=">
+    <meta name="theme-color" content="#fbf7f4">
 
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -302,7 +302,7 @@
                 <div class="table-container">
                     <table>
                         <tbody id="expenseTableBody">
-                            <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Đang tải dữ liệu...</td></tr>
+                            <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Đang kết nối dữ liệu trực tuyến...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -310,307 +310,24 @@
         </div>
     </div>
 
-    <script>
-        const DEFAULT_DATA = {
-            expenses: [
-                { name: 'Nạp tiền', price: 592000, time: '09/08', type: 'deposit' },
-                { name: 'Ăn sáng', price: 78000, time: '09/08', type: 'expense' },
-                { name: 'Rau muống, dưa leo, bún tào, nấm mèo', price: 28000, time: '09/08', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '09/08', type: 'expense' },
-                { name: 'Ăn tối', price: 100000, time: '09/08', type: 'expense' },
-                { name: 'Sữa đặc', price: 27000, time: '10/08', type: 'expense' },
-                { name: 'Ăn tối', price: 200000, time: '10/08', type: 'expense' },
-                { name: 'Sửa đồ', price: 25000, time: '10/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 36000, time: '11/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '11/08', type: 'deposit' },
-                { name: 'Ăn tối', price: 84000, time: '11/08', type: 'expense' },
-                { name: 'Tương ớt', price: 32000, time: '12/08', type: 'expense' },
-                { name: 'Ăn trưa', price: 125000, time: '12/08', type: 'expense' },
-                { name: 'Tỏi, bơ', price: 60000, time: '12/08', type: 'expense' },
-                { name: '2land', price: 65000, time: '12/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '13/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 1000000, time: '13/08', type: 'deposit' },
-                { name: 'Ăn trưa', price: 115000, time: '13/08', type: 'expense' },
-                { name: 'Sách tin', price: 40000, time: '13/08', type: 'expense' },
-                { name: 'Bút bi', price: 20000, time: '13/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 102000, time: '14/08', type: 'expense' },
-                { name: 'Ăn trưa', price: 80000, time: '14/08', type: 'expense' },
-                { name: 'Ăn tối', price: 165000, time: '14/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 70000, time: '16/08', type: 'expense' },
-                { name: 'Ăn trưa', price: 140000, time: '16/08', type: 'expense' },
-                { name: 'Cắt tóc', price: 60000, time: '16/08', type: 'expense' },
-                { name: 'Ăn tối', price: 90000, time: '16/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '17/08', type: 'expense' },
-                { name: 'Gửi xe', price: 3000, time: '17/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '18/08', type: 'deposit' },
-                { name: 'Ăn tối qua', price: 300000, time: '18/08', type: 'expense' },
-                { name: 'Sữa và khổ qua', price: 61000, time: '18/08', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '18/08', type: 'expense' },
-                { name: 'Ăn tối 18/8', price: 133000, time: '20/08', type: 'expense' },
-                { name: 'Ăn sáng 19/8', price: 55000, time: '20/08', type: 'expense' },
-                { name: 'Mua đồ 19/8', price: 23000, time: '20/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '21/08', type: 'deposit' },
-                { name: 'Ăn trưa', price: 100000, time: '21/08', type: 'expense' },
-                { name: 'Chè', price: 20000, time: '21/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 51000, time: '22/08', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '22/08', type: 'expense' },
-                { name: 'Bánh mì 22/8', price: 14000, time: '23/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 79000, time: '23/08', type: 'expense' },
-                { name: 'Mua đồ', price: 60000, time: '23/08', type: 'expense' },
-                { name: 'Mua đồ', price: 93000, time: '23/08', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '24/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '24/08', type: 'deposit' },
-                { name: 'Ăn sáng', price: 87000, time: '24/08', type: 'expense' },
-                { name: 'Ăn trưa', price: 145000, time: '24/08', type: 'expense' },
-                { name: 'Mua đồ', price: 46000, time: '28/08', type: 'expense' },
-                { name: 'Ăn tối 24/8', price: 190000, time: '28/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 200000, time: '30/08', type: 'deposit' },
-                { name: 'Ăn tối', price: 185000, time: '30/08', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '30/08', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '30/08', type: 'deposit' },
-                { name: 'Ăn trưa', price: 100000, time: '30/08', type: 'expense' },
-                { name: 'Lương Bo', price: 30000, time: '31/08', type: 'expense' },
-                { name: 'Mua đồ', price: 10000, time: '31/08', type: 'expense' },
-                { name: 'Ăn sáng 31/8', price: 75000, time: '01/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 63000, time: '01/09', type: 'expense' },
-                { name: 'Ăn tối 1/9', price: 60000, time: '03/09', type: 'expense' },
-                { name: 'Mua đồ 1/9', price: 16000, time: '03/09', type: 'expense' },
-                { name: 'Ăn tối 2/9', price: 161000, time: '03/09', type: 'expense' },
-                { name: 'Tương ớt', price: 14000, time: '03/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '03/09', type: 'deposit' },
-                { name: 'Lấy hàng', price: 100000, time: '03/09', type: 'expense' },
-                { name: 'Mua sách', price: 32000, time: '03/09', type: 'expense' },
-                { name: 'Ăn tối', price: 180000, time: '04/09', type: 'expense' },
-                { name: 'In', price: 14000, time: '04/09', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '05/09', type: 'expense' },
-                { name: 'Dưa leo', price: 7000, time: '05/09', type: 'expense' },
-                { name: 'Gỏi cuốn', price: 56000, time: '05/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 1000000, time: '05/09', type: 'deposit' },
-                { name: 'Ăn tối', price: 155000, time: '05/09', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '05/09', type: 'expense' },
-                { name: 'Bảo hiểm', price: 75000, time: '05/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 120000, time: '06/09', type: 'expense' },
-                { name: 'Mua đồ', price: 10000, time: '06/09', type: 'expense' },
-                { name: 'Sandwich', price: 26000, time: '06/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '07/09', type: 'expense' },
-                { name: 'Mua đồ', price: 38000, time: '07/09', type: 'expense' },
-                { name: 'Tỏi bầm', price: 10000, time: '07/09', type: 'expense' },
-                { name: 'Vở 200 trang 4 cuốn', price: 72000, time: '07/09', type: 'expense' },
-                { name: 'May phù hiệu', price: 10000, time: '07/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '08/09', type: 'expense' },
-                { name: 'Tiền quỷ Bo', price: 100000, time: '08/09', type: 'expense' },
-                { name: 'Đầu năm Bo', price: 115000, time: '08/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '08/09', type: 'expense' },
-                { name: 'Ăn trưa', price: 50000, time: '08/09', type: 'expense' },
-                { name: 'Đầu năm', price: 115000, time: '08/09', type: 'expense' },
-                { name: 'Phù hiệu thể dục', price: 5000, time: '08/09', type: 'expense' },
-                { name: 'Gửi xe qua', price: 9000, time: '10/09', type: 'expense' },
-                { name: 'Gửi xe qua', price: 9000, time: '11/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 75000, time: '11/09', type: 'deposit' },
-                { name: 'gửi xe 11/09', price: 3000, time: '12/09', type: 'expense' },
-                { name: 'trà sữa 11/09', price: 56000, time: '12/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '12/09', type: 'deposit' },
-                { name: 'ăn tối 11/09', price: 140000, time: '12/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 86000, time: '12/09', type: 'expense' },
-                { name: 'Tiền sách', price: 85000, time: '12/09', type: 'expense' },
-                { name: 'Ăn trưa', price: 70000, time: '12/09', type: 'expense' },
-                { name: 'Đan vợt', price: 80000, time: '12/09', type: 'expense' },
-                { name: 'Phù hiệu', price: 15000, time: '12/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '13/09', type: 'deposit' },
-                { name: 'Ăn sáng', price: 112000, time: '13/09', type: 'expense' },
-                { name: 'Ăn trưa', price: 115000, time: '13/09', type: 'expense' },
-                { name: 'Rau muống', price: 10000, time: '13/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '14/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '14/09', type: 'expense' },
-                { name: 'Ăn trưa', price: 50000, time: '14/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 44000, time: '15/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '15/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '16/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '17/09', type: 'expense' },
-                { name: 'Quỷ lớp bin', price: 150000, time: '17/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '18/09', type: 'deposit' },
-                { name: 'Gửi xe', price: 3000, time: '18/09', type: 'expense' },
-                { name: 'Tiền ăn sáng', price: 77000, time: '19/09', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '19/09', type: 'expense' },
-                { name: 'Sách bt đan', price: 60000, time: '19/09', type: 'expense' },
-                { name: 'Ăn trưa', price: 75000, time: '19/09', type: 'expense' },
-                { name: 'Ăn tối', price: 55000, time: '19/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 335000, time: '19/09', type: 'deposit' },
-                { name: 'Tập đề cường', price: 27000, time: '20/09', type: 'expense' },
-                { name: 'Quỷ lớp Bo', price: 88000, time: '21/09', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '21/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 76000, time: '21/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '21/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '22/09', type: 'expense' },
-                { name: 'Bù gà', price: 2000, time: '22/09', type: 'expense' },
-                { name: 'Canh khổ qua', price: 20000, time: '23/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 96000, time: '23/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '23/09', type: 'expense' },
-                { name: 'Ăn tối qua Bo', price: 35000, time: '24/09', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '24/09', type: 'expense' },
-                { name: 'Sửa đồ', price: 15000, time: '25/09', type: 'expense' },
-                { name: 'Gửi xe', price: 3000, time: '26/09', type: 'expense' },
-                { name: 'Ăn sáng qua', price: 48000, time: '26/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 75000, time: '26/09', type: 'deposit' },
-                { name: 'Ăn sáng', price: 95000, time: '26/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 400000, time: '26/09', type: 'deposit' },
-                { name: 'Mua đồ', price: 83000, time: '26/09', type: 'expense' },
-                { name: 'Gửi xe', price: 3000, time: '26/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 120000, time: '27/09', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '28/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '28/09', type: 'expense' },
-                { name: 'Ăn tối qua Bo', price: 35000, time: '29/09', type: 'expense' },
-                { name: 'Tiền ăn sáng', price: 90000, time: '29/09', type: 'expense' },
-                { name: 'Tiền gửi xe', price: 9000, time: '29/09', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '30/09', type: 'expense' },
-                { name: 'Nạp tiền', price: 1000000, time: '30/09', type: 'deposit' },
-                { name: 'Ăn tối', price: 140000, time: '30/09', type: 'expense' },
-                { name: 'Ăn sáng', price: 43000, time: '01/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '01/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 75000, time: '02/10', type: 'expense' },
-                { name: 'Photo', price: 25000, time: '02/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '02/10', type: 'expense' },
-                { name: 'Ăn tối', price: 26000, time: '02/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '03/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '03/10', type: 'expense' },
-                { name: 'Cắt tóc', price: 60000, time: '03/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '04/10', type: 'expense' },
-                { name: 'Ăn trưa', price: 164000, time: '04/10', type: 'expense' },
-                { name: 'Bin', price: 20000, time: '05/10', type: 'expense' },
-                { name: 'Bo', price: 45000, time: '05/10', type: 'expense' },
-                { name: 'Lấy hàng', price: 130000, time: '05/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '05/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '05/10', type: 'expense' },
-                { name: 'Gửi xe 6/10', price: 9000, time: '08/10', type: 'expense' },
-                { name: 'Gửi xe 7/10', price: 9000, time: '08/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '08/10', type: 'deposit' },
-                { name: 'Ăn tối qua bo', price: 35000, time: '08/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 84000, time: '08/10', type: 'expense' },
-                { name: 'Ăn tối', price: 35000, time: '08/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '09/10', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '10/10', type: 'expense' },
-                { name: 'Lương Bin', price: 20000, time: '10/10', type: 'expense' },
-                { name: 'Ăn trưa', price: 50000, time: '10/10', type: 'expense' },
-                { name: 'Bánh cúng', price: 62000, time: '10/10', type: 'expense' },
-                { name: 'Đề cương in', price: 30000, time: '10/10', type: 'expense' },
-                { name: 'Bo ứng 10k cắt tóc', price: 10000, time: '10/10', type: 'expense' },
-                { name: 'Ăn sáng nay', price: 50000, time: '10/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '11/10', type: 'deposit' },
-                { name: 'Ăn sáng', price: 95000, time: '11/10', type: 'expense' },
-                { name: 'Cà phê muối', price: 72000, time: '11/10', type: 'expense' },
-                { name: 'Bột chiên nc mắm', price: 33000, time: '12/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 54000, time: '12/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '12/10', type: 'expense' },
-                { name: 'Ăn tối', price: 95000, time: '12/10', type: 'expense' },
-                { name: 'Gửi xe qua', price: 9000, time: '14/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '14/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '14/10', type: 'expense' },
-                { name: 'Ăn tối bo', price: 35000, time: '14/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 74000, time: '15/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '15/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '16/10', type: 'deposit' },
-                { name: 'Ăn sáng', price: 76000, time: '16/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '16/10', type: 'expense' },
-                { name: 'Ăn tối', price: 105000, time: '16/10', type: 'expense' },
-                { name: 'Gỏi cuốn', price: 28000, time: '16/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 48000, time: '17/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '17/10', type: 'expense' },
-                { name: 'Ăn trưa', price: 110000, time: '17/10', type: 'expense' },
-                { name: 'Ăn sáng bin', price: 30000, time: '18/10', type: 'expense' },
-                { name: 'Lương bin', price: 20000, time: '18/10', type: 'expense' },
-                { name: 'Lương Bo', price: 40000, time: '18/10', type: 'expense' },
-                { name: 'Tiền ăn sáng bo đan', price: 50000, time: '18/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '18/10', type: 'deposit' },
-                { name: 'Sửa xe', price: 30000, time: '18/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 75000, time: '19/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '19/10', type: 'expense' },
-                { name: 'Ăn tối', price: 35000, time: '19/10', type: 'expense' },
-                { name: 'Gửi xe qua', price: 9000, time: '21/10', type: 'expense' },
-                { name: 'Ăn sáng qua', price: 90000, time: '21/10', type: 'expense' },
-                { name: 'Tiền góp lớp 10+15', price: 25000, time: '21/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '21/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '21/10', type: 'expense' },
-                { name: 'Ăn tối Bo', price: 35000, time: '21/10', type: 'expense' },
-                { name: 'Ăn tối bin đan', price: 80000, time: '21/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '22/10', type: 'deposit' },
-                { name: 'Ăn sáng', price: 95000, time: '22/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '22/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 105000, time: '23/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '23/10', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '23/10', type: 'expense' },
-                { name: 'Ăn tối bin bo', price: 58000, time: '23/10', type: 'expense' },
-                { name: 'Lương Bin', price: 20000, time: '23/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '24/10', type: 'deposit' },
-                { name: 'Cá viên', price: 190000, time: '24/10', type: 'expense' },
-                { name: 'Nước', price: 32000, time: '24/10', type: 'expense' },
-                { name: 'Bánh tráng nướng', price: 45000, time: '24/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 36000, time: '24/10', type: 'expense' },
-                { name: 'Bánh cúng', price: 77000, time: '24/10', type: 'expense' },
-                { name: 'Khăn giấy', price: 8000, time: '24/10', type: 'expense' },
-                { name: 'Rau xanh', price: 29000, time: '24/10', type: 'expense' },
-                { name: 'Sửa đồ', price: 20000, time: '25/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '26/10', type: 'expense' },
-                { name: 'Thay bánh', price: 100000, time: '26/10', type: 'expense' },
-                { name: 'Ăn tối Bo', price: 35000, time: '26/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 80000, time: '27/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '27/10', type: 'expense' },
-                { name: 'Canh chua', price: 10000, time: '27/10', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '28/10', type: 'deposit' },
-                { name: 'Ăn sáng', price: 90000, time: '28/10', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '28/10', type: 'expense' },
-                { name: 'Ăn tối Bo', price: 35000, time: '28/10', type: 'expense' },
-                { name: 'Ăn trưa', price: 50000, time: '28/10', type: 'expense' },
-                { name: 'Gửi xe qua', price: 9000, time: '30/10', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '30/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 105000, time: '30/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 60000, time: '31/10', type: 'expense' },
-                { name: 'Ăn tôid qua bo', price: 18000, time: '31/10', type: 'expense' },
-                { name: 'Đề cương', price: 23000, time: '31/10', type: 'expense' },
-                { name: 'Ăn sáng', price: 70000, time: '01/11', type: 'expense' },
-                { name: 'Lương Bin', price: 20000, time: '01/11', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '03/11', type: 'deposit' },
-                { name: 'Bút bi', price: 20000, time: '03/11', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '03/11', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '03/11', type: 'expense' },
-                { name: 'Ăn tôid Bo qua', price: 35000, time: '03/11', type: 'expense' },
-                { name: 'Ăn sáng', price: 75000, time: '03/11', type: 'expense' },
-                { name: 'Ăn trưa', price: 100000, time: '03/11', type: 'expense' },
-                { name: 'Ăn sáng', price: 90000, time: '04/11', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '04/11', type: 'expense' },
-                { name: 'Nạp tiền', price: 300000, time: '04/11', type: 'deposit' },
-                { name: 'Quỷ lớp Bo', price: 200000, time: '04/11', type: 'expense' },
-                { name: 'Ăn tối bo', price: 55000, time: '04/11', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '05/11', type: 'expense' },
-                { name: 'Nạp tiền', price: 500000, time: '06/11', type: 'deposit' },
-                { name: 'Ăn sáng', price: 101000, time: '06/11', type: 'expense' },
-                { name: 'Gửi xe', price: 9000, time: '06/11', type: 'expense' },
-                { name: 'Ăn sáng qua', price: 90000, time: '06/11', type: 'expense' },
-                { name: 'Ăn sáng', price: 70000, time: '07/11', type: 'expense' },
-                { name: 'Gửi xe', price: 6000, time: '07/11', type: 'expense' },
-                { name: 'Kem', price: 7000, time: '07/11', type: 'expense' },
-                { name: 'Lương Bo', price: 50000, time: '07/11', type: 'expense' },
-                { name: 'Cà phê muối', price: 18000, time: '07/11', type: 'expense' },
-                { name: 'Lương Bin', price: 20000, time: '07/11', type: 'expense' },
-                { name: 'Ăn tối', price: 110000, time: '07/11', type: 'expense' },
-                { name: 'Ăn vặt', price: 110000, time: '07/11', type: 'expense' },
-                { name: 'Bơ già dừa non', price: 25000, time: '07/11', type: 'expense' }
-            ]
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcrniyvrvC1kvQSINdprgjZ-cjm5SMqM",
+            authDomain: "coins-a74d8.firebaseapp.com",
+            databaseURL: "https://coins-a74d8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "coins-a74d8",
+            storageBucket: "coins-a74d8.firebasestorage.app",
+            messagingSenderId: "805726364508",
+            appId: "1:805726364508:web:39e6b9129d834efe2d9799"
         };
-
-        function getStorageData() {
-            const data = localStorage.getItem('jade_offline_v3');
-            if (!data) {
-                localStorage.setItem('jade_offline_v3', JSON.stringify(DEFAULT_DATA));
-                return DEFAULT_DATA;
-            }
-            return JSON.parse(data);
-        }
-
-        function saveStorageData(data) {
-            localStorage.setItem('jade_offline_v3', JSON.stringify(data));
-        }
-
-        let appData = getStorageData();
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'family_data');
+        let globalData = null;
 
         function triggerVibration() {
             if ('vibrate' in navigator) navigator.vibrate(30);
@@ -650,27 +367,27 @@
             return `${dd}/${mm}`;
         }
 
-        function updateUI() {
-            const expenses = appData.expenses || [];
+        function updateUI(data) {
+            if (!data) return;
+            const expenses = data.expenses || [];
             const totalDeposit = expenses.filter(e => e.type === 'deposit').reduce((a, b) => a + b.price, 0);
             const totalSpent = expenses.filter(e => e.type === 'expense').reduce((a, b) => a + b.price, 0);
-            
-            let currentBal = totalDeposit - totalSpent;
+            const currentBal = totalDeposit - totalSpent;
+
             document.getElementById('currentBalance').innerText = currentBal.toLocaleString('vi-VN') + ' đ';
-            renderTable();
+            renderTable(expenses);
         }
 
-        function renderTable() {
-            const expenses = appData.expenses || [];
+        function renderTable(expenses) {
             const tbody = document.getElementById('expenseTableBody');
             
-            if (expenses.length === 0) {
+            if (!expenses || expenses.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 20px 0;">Chưa có khoản thu chi nào</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = expenses.slice().map((e, index) => {
-                const realIndex = expenses.indexOf(e);
+                const realIndex = (globalData.expenses || []).indexOf(e);
                 const isDep = e.type === 'deposit';
                 const sign = isDep ? '+' : '-';
                 const color = isDep ? 'var(--green-color)' : 'var(--red-color)';
@@ -690,63 +407,54 @@
             }).reverse().join('');
         }
 
-        window.depositMoney = function() {
+        window.depositMoney = async function() {
             triggerVibration();
             const amt = getCleanNumber('depositAmount');
             if(amt > 0) {
-                appData.expenses.push({ 
-                    name: 'Nạp tiền', 
-                    price: amt, 
-                    time: getShortDate(), 
-                    type: 'deposit' 
-                });
-                saveStorageData(appData);
+                const snap = await get(dbRef);
+                const data = snap.val() || { expenses: [] };
+                const exps = data.expenses || [];
+                exps.push({ name: 'Nạp tiền', price: amt, time: getShortDate(), type: 'deposit' });
+                await update(dbRef, { balance: (data.balance || 0) + amt, expenses: exps });
                 document.getElementById('depositAmount').value = '';
                 document.getElementById('depositSuggestions').innerHTML = '';
-                updateUI();
             }
         };
 
-        window.addExpense = function() {
+        window.addExpense = async function() {
             triggerVibration();
             const name = document.getElementById('productName').value.trim();
             const price = getCleanNumber('productPrice');
             if(name && price > 0) {
-                appData.expenses.push({ 
-                    name, 
-                    price, 
-                    time: getShortDate(), 
-                    type: 'expense' 
-                });
-                saveStorageData(appData);
+                const snap = await get(dbRef);
+                const data = snap.val() || { expenses: [] };
+                const exps = data.expenses || [];
+                exps.push({ name, price, time: getShortDate(), type: 'expense' });
+                await update(dbRef, { expenses: exps });
                 document.getElementById('productName').value = '';
                 document.getElementById('productPrice').value = '';
                 document.getElementById('priceSuggestions').innerHTML = '';
-                updateUI();
             }
         };
 
-        window.deleteExpense = function(index) {
+        window.deleteExpense = async function(index) {
             triggerVibration();
             if(confirm("Bạn có chắc muốn xóa khoản này không?")) {
-                appData.expenses.splice(index, 1);
-                saveStorageData(appData);
-                updateUI();
+                const snap = await get(dbRef);
+                const data = snap.val() || {};
+                let exps = data.expenses || [];
+                exps.splice(index, 1);
+                await update(dbRef, { expenses: exps });
             }
         };
 
-        // Kích hoạt Service Worker nội bộ để lưu cache chạy ngoại tuyến hoàn toàn
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-        }
-
-        window.addEventListener('load', updateUI);
+        onValue(dbRef, (snap) => {
+            const data = snap.val();
+            if (data) {
+                globalData = data;
+                updateUI(data);
+            }
+        });
     </script>
 </body>
 </html>
